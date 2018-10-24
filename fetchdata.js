@@ -78,7 +78,7 @@ base('quotation').create({
             message: `Tạo Dự Án Không Thành Công, Vui lòng kiểm tra lại thông tin`
           });  
         return; }
-      console.log(record.getId());
+      //console.log(record.getId());
   });
 }
 
@@ -175,7 +175,7 @@ function mainAction(){
                       });
                     createProject(this)
                   } else {
-                    console.log('error submit!!');
+                    //console.log('error submit!!');
                     return false;
                   }
                 });
@@ -198,14 +198,24 @@ function mainAction(){
                 dataInForm:[{
                     cong_tac : '',
                     hang_muc : '',
+                    unitPiece : false, // it is represented for "cái", "bộ", "g"
+                    unitMd : false, //It is represented for md
+                    unitM2: false,
+                    unitM3: false,
                     price : 0,
                     number : 0,
                     cost: 0,
-                    subjectId:''
+                    subjectId:'',
+                    length: 0,
+                    wide: 0,
+                    height: 0,
+                    
                 }],
                 allWorks: '',
                 allSubjects : '',
                 allPrice: '',
+                allUnit: '',
+                bug: false
             }
         },
     
@@ -214,19 +224,59 @@ function mainAction(){
         
         methods: {
             set_cost: function(i) {
-                this.dataInForm[i-1].cost= this.dataInForm[i-1].price * this.dataInForm[i-1].number
+                //find unit
+                let _unit= ''
+                let _dataInForm =  this.dataInForm[i];
+                for (let property in _dataInForm) {
+                  if (_dataInForm[property] === true && property.indexOf('unit') > -1 ) {
+                    _unit = property
+                  }
+                }
+
+                if (_unit === '') {console.error('unit of data in this form is wrong'); return;}
+
+                
+                switch (_unit) {
+                  case 'unitPiece':
+                    this.dataInForm[i].cost= this.dataInForm[i].price * this.dataInForm[i].number;
+                    break;
+
+                  case 'unitMd':
+                    this.dataInForm[i].cost = this.dataInForm[i].price * this.dataInForm[i].length * this.dataInForm[i].number;
+                    break;
+
+                  case 'unitM2':
+                    this.dataInForm[i].cost = this.dataInForm[i].price * this.dataInForm[i].length * this.dataInForm[i].wide  * this.dataInForm[i].number;
+                    break;
+
+                  case 'unitM3':
+                    this.dataInForm[i].cost = this.dataInForm[i].price * this.dataInForm[i].length * this.dataInForm[i].wide * this.dataInForm[i].height  * this.dataInForm[i].number;
+                    break;
+
+                  default:
+                    this.bug = true; // when add a new unit, method for computing quotaion will change, so avoid working fail, set bug = true
+                    break;
+                } 
             },
             add: function(){
                 this.dataInForm.push({
-                    cong_tac : '',
-                    hang_muc : '',
-                    price : 0,
-                    number : 0,
-                    cost: this.price*this.number,
+                  cong_tac : '',
+                  hang_muc : '',
+                  unitPiece : false, // it is represented for "cái", "bộ", "g"
+                  unitMd : false, //It is represented for md
+                  unitM2: false,
+                  unitM3: false,
+                  price : 0,
+                  number : 0,
+                  cost: 0,
+                  subjectId:'',
+                  length: 0,
+                  wide: 0,
+                  height: 0,
                 })
             },
             remove: function(i) {
-                console.log(i)
+                //console.log(i)
                 this.dataInForm.splice(i-1, 1)
             },
             getSubjectId : function(hang_muc) {
@@ -242,47 +292,103 @@ function mainAction(){
             },
             formatData: function() {
                 // get all works
+                // get all subject
+                // get all price
+                // get all unit
                 let _todo = Object.assign([]);
                 let _subjects = Object.assign({});
                 let _prices = Object.assign({});
+                let _units = Object.assign({});
                 let _dataAvaible = this.dataAvaible;
                 _dataAvaible.forEach(data => {
+                     
                     let _works = data.get('Công tác');
                     //add into price
                     _prices[data.get('Hạng mục')] = data.get('Giá bán')
+                    //add into unit
+                    _units[data.get('Hạng mục')] = data.get('Đơn vị tính')
                     if (_todo.indexOf(_works) < 0) {
                         _todo.push(_works);
                         _subjects[_works] = [data.get('Hạng mục')];
                     } else {
                         _subjects[_works].push(data.get('Hạng mục'));
                     }
-                    // let check_exist = _todo.filter(record => {return record['work'] === _works})
-    
-                    // if (check_exist.length === 0)  {
-                    //     _todo.push
-                    // }
+
                 })
                 this.allWorks =  _todo;
                 this.allSubjects = _subjects;
                 this.allPrice = _prices;
-                //get all hang muc {congtac:[hangmuc1,hangmuc2]}
+                this.allUnit = _units;
             },
 
             filterSubject:function (i) {
                 _work = this.dataInForm[i].cong_tac;
                 this.dataInForm[i].subjects = this.allSubjects[_work]
             },
-            setPriceAndSubjectId: function(i) {
+            setUnit: function (unitForTrue,index) {
+              let _lst= ['unitPiece', 'unitMd', 'unitM2', 'unitM3'];
+              _lst.forEach(el => {
+                if (unitForTrue === el) {
+                  this.dataInForm[index][el]= true
+                } else {
+                  this.dataInForm[index][el]= false
+                }
+              })
+            },
+            setPrice_SubjectId_Unit: function(i) {
                 let _hang_muc = this.dataInForm[i].hang_muc;
                 this.dataInForm[i].price= this.allPrice[_hang_muc]
+                // set subjectId of dataInForm
                 let _subjectId = this.getSubjectId(_hang_muc);
                 this.dataInForm[i].subjectId= _subjectId;
+                //set unit of dataInForm
+                let _unit = this.allUnit[_hang_muc];
+                switch (_unit) {
+                  case 'cái':
+                    // this.dataInForm[i].unitPiece = true;
+                    this.setUnit('unitPiece',i)
+                    break;
+                  
+                  case 'bộ':
+                  // this.dataInForm[i].unitPiece = true;
+                  this.setUnit('unitPiece',i)
+                  break;
+
+
+                  case "gói":
+                  // this.dataInForm[i].unitPiece = true;
+                  this.setUnit('unitPiece',i)
+                  break;  
+
+                  case 'md':
+                    // this.dataInForm[i].unitMd = true;
+                    this.setUnit('unitMd',i)
+                    break;
+
+                  case 'm2':
+                    // this.dataInForm[i].unitM2 = true;
+                    this.setUnit('unitM2',i)
+                    break;
+                    
+                  case 'm3':
+                    // this.dataInForm[i].unitM3 =  true;
+                    this.setUnit('unitM3',i)
+                    break;
+
+                  default:
+                    this.bug = true; // when add a new unit, method for computing quotaion will change, so avoid working fail, set bug = true
+                    break;
+                } 
+                // change cost if cost have setted before
+                if (this.dataInForm[i].cost !== 0 && typeof this.dataInForm[i].cost !== 'undefined') {
+                  console.log('run set cost in setprice ..v.v.', this.dataInForm[i].cost);
+                  this.set_cost(i)
+                }
             },
             resetForm: function(nameForm) {
                 this.$refs[nameForm].resetFields()
             },
             emitViewEvent: function() {
-                console.log('run emit')
                 this.$emit('view-quotation',this.dataInForm)
             }
             
@@ -305,7 +411,6 @@ function mainAction(){
         },
         methods: {
             viewQuotation: function(dataGrid) {
-                console.log('receive')
                 this.data = dataGrid;
                 this.dialogTableVisible = true;
             }

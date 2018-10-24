@@ -32,17 +32,53 @@
                         </el-form-item>
                         </div>
                         <div class="col-9">
-                            <el-form-item label="Chọn Công tác" >
+                            <el-form-item label="Chọn hạng mục" >
                                 <el-select v-model="dataInForm[i-1].hang_muc"  placeholder="Chọn hạng mục">
-                                    <el-option :change = "setPriceAndSubjectId(i-1)" v-for= "subject in allSubjects[dataInForm[i-1].cong_tac]" :key="subject" :label="subject" :value="subject"></el-option>
+                                    <el-option :change = "setPrice_SubjectId_Unit(i-1)" v-for= "subject in allSubjects[dataInForm[i-1].cong_tac]" :key="subject" :label="subject" :value="subject"></el-option>
                                 </el-select>
                             </el-form-item>
                             </div>
-                        <div class="col-9">
+
+                        <div class="col-9" v-if="dataInForm[i-1].unitPiece">
                         <el-form-item label="số lượng">
-                                <el-input-number v-model="dataInForm[i-1].number" @change="set_cost(i)" :min="0" ></el-input-number>
+                                <el-input-number v-model="dataInForm[i-1].number" @change="set_cost(i-1)" :min="0" ></el-input-number>
                         </el-form-item>
                         </div>
+                        <div class="col-9" v-if="dataInForm[i-1].unitMd">
+                          <el-form-item label="Chiều dài">
+                            <el-input-number v-model="dataInForm[i-1].length" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                          </el-form-item>
+                          <el-form-item label="số lượng">
+                            <el-input-number v-model="dataInForm[i-1].number" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                          </el-form-item>
+                          </div>
+                          <div class="col-9" v-if="dataInForm[i-1].unitM2">
+                            <el-form-item label="Chiều Dài">
+                              <el-input-number v-model="dataInForm[i-1].length" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Chiều rộng">
+                                <el-input-number v-model="dataInForm[i-1].wide" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="số lượng">
+                                  <el-input-number v-model="dataInForm[i-1].number" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                          </div>
+                          <div class="col-9" v-if="dataInForm[i-1].unitM3">
+                            <el-form-item label="Chiều Dài">
+                                  <el-input-number v-model="dataInForm[i-1].length" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Chiều Rộng">
+                                <el-input-number v-model="dataInForm[i-1].wide" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                              <el-form-item label="Chiều Cao">
+                                  <el-input-number v-model="dataInForm[i-1].height" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="số lượng">
+                                <el-input-number v-model="dataInForm[i-1].number" @change="set_cost(i-1)" :min="0" ></el-input-number>
+                            </el-form-item>
+                          </div>
+
+
                     
                         <div class="col-9">
                         <el-form-item label="Thành Giá">
