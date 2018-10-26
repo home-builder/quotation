@@ -83,7 +83,7 @@
                         <div class="col-9">
                         <el-form-item label="Thành Giá">
                                 <label class="text-warning">{{
-                                   dataInForm[i-1].cost
+                                   formatPrice(dataInForm[i-1].cost)
                                 }}</label>
                         </el-form-item>
                         </div>
@@ -115,7 +115,9 @@
             <el-table-column property="hang_muc" label="Hạng Mục"></el-table-column>
       
             <el-table-column property="price" label="Giá"></el-table-column>
-
+            <el-table-column property="length" label="Chiều Dài"></el-table-column>
+            <el-table-column property="wide" label="Chiều Rộng"></el-table-column>
+            <el-table-column property="height" label="Chiều Cao"></el-table-column>
             <el-table-column property="number" label="Số Lượng"></el-table-column>
  
             <el-table-column property="cost" label="Chi Phí"></el-table-column>
@@ -126,7 +128,7 @@
                 <h3 class="mx-auto">Tổng</h3>
             </div>
             <div class="col-md-3 p-3 text-danger">
-                <h3 class="mx-auto">{{totalCost}}</h3>
+                <h3 class="mx-auto">{{formatPrice(totalCost)}}</h3>
             </div>
         </div>
         <div class="row">

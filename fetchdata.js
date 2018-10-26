@@ -30,7 +30,7 @@ function createProject(that) {
             //   console.log(projectId)
               let objToSubmit = makeObjToSubmit(that.data, projectId)
               objToSubmit.forEach( element => {
-                createQuotation(element)
+                createQuotation(element,that)
               })
               that.loading.close();
               that.$notify({
@@ -54,6 +54,9 @@ function makeObjToSubmit(obj,projectId) {
         let _ = {   subjectId: element.subjectId, 
                     projectId: projectId,
                     number: element.number,
+                    length : element.length,
+                    wide: element.wide,
+                    height: element.height,
                     cost: element.cost
                 }
         objs.push(_)
@@ -61,7 +64,7 @@ function makeObjToSubmit(obj,projectId) {
     return objs
 }
 
-function createQuotation(quotationObj) {
+function createQuotation(quotationObj,that) {
 base('quotation').create({
     "Dự án": [
         quotationObj.projectId
@@ -69,10 +72,14 @@ base('quotation').create({
     "Hạng Mục": [
         quotationObj.subjectId
     ],
+    "Chiều cao": quotationObj.height,
+    "Chiều rộng": quotationObj.wide,
+    "Chiều dài": quotationObj.length,
     "số lượng": quotationObj.number,
     "Chi phí": parseInt(quotationObj.cost)
   }, function(err, record) {
       if (err) {
+        console.log(err);
         that.$notify.error({
             title: 'Error',
             message: `Tạo Dự Án Không Thành Công, Vui lòng kiểm tra lại thông tin`
@@ -180,9 +187,16 @@ function mainAction(){
                   }
                 });
               },
+
               resetForm(formName) {
                 this.$refs[formName].resetFields();
+              },
+
+              formatPrice(value) {
+                // let val = (value/1).toFixed(2).replace('.',',')
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
               }
+
         },
         mounted() {
             this.computeTotalCost();
@@ -390,9 +404,11 @@ function mainAction(){
             },
             emitViewEvent: function() {
                 this.$emit('view-quotation',this.dataInForm)
-            }
-            
-    
+            },
+            formatPrice(value) {
+                // let val = (value/1).toFixed(2).replace('.',',')
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
         },
         mounted() {
             this.formatData()
